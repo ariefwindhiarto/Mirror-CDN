@@ -2,21 +2,24 @@ name: Update DNS Bebas Sensor
 
 on:
   schedule:
-    - cron: '0 3 * * *'     # Pagi jam 10 WIB
-    - cron: '0 13 * * *'    # Sore jam 20 WIB
+    - cron: '0 3 * * *'   # Setiap hari jam 10:00 WIB
+    - cron: '0 15 * * *'  # Setiap hari jam 22:00 WIB
   workflow_dispatch:
 
 jobs:
   update-dns:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
 
       - name: Siapkan folder DNS
-        run: mkdir -p dns-upstream
+        run: |
+          mkdir -p dns-upstream
 
       - name: Generate DNS aktif dari harian-tercepat.txt
+        timeout-minutes: 3
         run: |
           > dns-upstream/indonesia-optimal.txt
           > dns-upstream/dns-test-log.txt
@@ -29,22 +32,16 @@ jobs:
             server=$(echo "$line" | cut -d'#' -f1 | xargs)
             comment=$(echo "$line" | cut -d'#' -f2- | xargs)
 
-            if [ -z "$server" ] || [[ "$server" =~ ^# ]]; then
-              continue
-            fi
+            if [ -z "$server" ] || [[ "$server" =~ ^# ]]; then continue; fi
+            if [ "$count" -ge "$MAX_DNS" ]; then break; fi
 
-            if [ "$count" -ge "$MAX_DNS" ]; then
-              echo "🛑 Batas maksimal $MAX_DNS DNS telah diuji."
-              break
-            fi
-
-            timeout 3 bash -c "dig @$server google.com +short +timeout=1" > /dev/null 2>&1
-            if [ $? -eq 0 ]; then
+            latency=$(dig @$server google.com +stats +timeout=1 +tries=1 2>&1 | grep "Query time" | awk '{print $4}')
+            if [ -n "$latency" ]; then
               echo "$server # $comment" >> dns-upstream/indonesia-optimal.txt
-              echo "✅ $server aktif" >> dns-upstream/dns-test-log.txt
+              echo "✅ $server aktif ($latency ms)" >> dns-upstream/dns-test-log.txt
               count=$((count+1))
             else
-              echo "❌ $server mati" >> dns-upstream/dns-test-log.txt
+              echo "❌ $server gagal" >> dns-upstream/dns-test-log.txt
             fi
           done < dns-upstream/harian-tercepat.txt
 
@@ -55,8 +52,7 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add dns-upstream/indonesia-optimal.txt
-          git add dns-upstream/dns-test-log.txt
-          git commit -m "Auto update DNS aktif dan bebas sensor" || echo "Tidak ada perubahan"
+          git commit -m "Auto update DNS optimal bebas sensor" || echo "Tidak ada perubahan"
           git push
 
       - name: Kirim notifikasi Telegram
@@ -64,34 +60,10 @@ jobs:
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
         run: |
-          DATE=$(date '+%Y-%m-%d')
-          COUNT=$(wc -l < dns-upstream/indonesia-optimal.txt)
-          ACTOR="${{ github.actor }}"
-
-          LOG=$(cat dns-upstream/indonesia-optimal.txt | head -n 10 | sed ':a;N;$!ba;s/\n/%0A/g')
-
-          MSG="📢 *DNS BEBAS SENSOR DIPERBARUI*\n🧑 Pemicu: $ACTOR\n📅 Tanggal: $DATE\n🧮 Baris: $COUNT\n\n*File:* \`indonesia-optimal.txt\`\n✅ Siap digunakan oleh AdGuard Home\n\n🔎 *10 DNS Teratas:*\n\`\`\`\n$LOG\n\`\`\`"
-
-          curl -s -X POST "https://api.telegram.org/bot$BOT_TOKEN/sendMessage" \
-          -d chat_id="$CHAT_ID" \
-          -d parse_mode="Markdown" \
-          -d text="$MSG"
-
-      - name: Tes & urutkan DNS aktif berdasarkan latency
-        run: |
-          cp dns-upstream/indonesia-optimal.txt dns-upstream/temp.txt
-          > dns-upstream/sorted.txt
-
-          while read -r line; do
-            server=$(echo "$line" | cut -d'#' -f1 | xargs)
-            comment=$(echo "$line" | cut -d'#' -f2- | xargs)
-
-            if [ -z "$server" ]; then continue; fi
-
-            latency=$(dig @$server google.com +stats +timeout=2 2>&1 | grep "Query time" | awk '{print $4}')
-            if [ -n "$latency" ]; then
-              echo "$latency ms | $server # $comment" >> dns-upstream/sorted.txt
-            fi
-          done < dns-upstream/temp.txt
-
-          sort -n dns-upstream/sorted.txt | cut -d'|' -f2- > dns-upstream/indonesia-optimal.txt
+          TANGGAL=$(date +"%Y-%m-%d")
+          BARIS=$(wc -l < dns-upstream/indonesia-optimal.txt | xargs)
+          PENGUBAH=$(git log -1 --pretty=format:'%an')
+          curl -s -X POST https://api.telegram.org/bot$BOT_TOKEN/sendMessage \
+            -d chat_id=$CHAT_ID \
+            -d text="📢 *DNS BEBAS SENSOR TERBARU*\n📅 *$TANGGAL*\n📄 Baris: $BARIS\n✍️ Update oleh: $PENGUBAH\n\n✅ Siap digunakan oleh AdGuard Home.\n\nFile: \`indonesia-optimal.txt\`" \
+            -d parse_mode="Markdown"
