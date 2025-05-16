@@ -3,20 +3,20 @@ name: Update DNS Indonesia Optimal
 on:
   schedule:
     - cron: '0 3 * * *' # Setiap hari jam 3 pagi (WIB)
-  workflow_dispatch:     # Bisa dijalankan manual juga dari tab Actions
+  workflow_dispatch:
 
 jobs:
   update-dns:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
 
       - name: Download DNS terbaik dan update file
-  run: |
-    mkdir -p dns-upstream
-    echo -e "1.1.1.1\ntls://1.1.1.1\n8.8.8.8\ntls://8.8.8.8\n9.9.9.9\ntls://9.9.9.9" > dns-upstream/indonesia-optimal.txt
-
+        run: |
+          mkdir -p dns-upstream
+          echo -e "1.1.1.1\ntls://1.1.1.1\n8.8.8.8\ntls://8.8.8.8\n9.9.9.9\ntls://9.9.9.9" > dns-upstream/indonesia-optimal.txt
 
       - name: Commit & Push if updated
         run: |
