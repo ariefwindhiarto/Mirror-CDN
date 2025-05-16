@@ -56,17 +56,18 @@ jobs:
           git push
 
       - name: Kirim notifikasi Telegram
-        env:
-          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
-          CHAT_ID: ${{ secrets.CHAT_ID }}
-        run: |
-          TANGGAL=$(date +"%Y-%m-%d")
-          BARIS=$(wc -l < dns-upstream/indonesia-optimal.txt | xargs)
-          PENGUBAH=$(git log -1 --pretty=format:'%an')
-         curl -s -X POST https://api.telegram.org/bot$BOT_TOKEN/sendMessage \
-  -d chat_id="$CHAT_ID" \
-  -d parse_mode="Markdown" \
-  -d text="📢 *DNS BEBAS SENSOR TERBARU*
+  env:
+    BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+    CHAT_ID: ${{ secrets.CHAT_ID }}
+  run: |
+    TANGGAL=$(date +"%Y-%m-%d")
+    BARIS=$(wc -l < dns-upstream/indonesia-optimal.txt | xargs)
+    PENGUBAH=$(git log -1 --pretty=format:'%an')
+
+    curl -s -X POST https://api.telegram.org/bot$BOT_TOKEN/sendMessage \
+      -d chat_id="$CHAT_ID" \
+      -d parse_mode="Markdown" \
+      -d text="📢 *DNS BEBAS SENSOR TERBARU*
 📅 *$TANGGAL*
 📄 Baris: $BARIS
 ✍️ Update oleh: $PENGUBAH
