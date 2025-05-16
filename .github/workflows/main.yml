@@ -17,10 +17,11 @@ jobs:
     - name: Siapkan folder DNS
       run: mkdir -p dns-upstream
 
-       - name: Generate DNS aktif dari harian-tercepat.txt
+          - name: Generate DNS aktif dari harian-tercepat.txt
       run: |
         > dns-upstream/indonesia-optimal.txt
-        > dns-upstream/dns-test-log.txt
+        ...
+
 
         MAX_DNS=25   # 🔒 Batas aman untuk GitHub Actions
 
