@@ -1,0 +1,16 @@
+@@||google.com^
+@@||gmail.com^
+@@||youtube.com^
+@@||klikbca.com^
+@@||bca.co.id^
+@@||mandiri.co.id^
+@@||bukalapak.com^
+@@||tokopedia.com^
+@@||shopee.co.id^
+@@||detik.com^
+@@||kompas.com^
+@@||tribunnews.com^
+@@||cnbcindonesia.com^
+@@||cnnindonesia.com^
+@@||gojek.com^
+@@||grab.com^
