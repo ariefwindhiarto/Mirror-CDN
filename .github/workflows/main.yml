@@ -26,9 +26,12 @@ jobs:
         git commit -m "Auto update dari harian-tercepat.txt" || echo "Tidak ada perubahan"
         git push
 
-    - name: Kirim notifikasi Telegram
-      run: |
-        curl -s -X POST https://api.telegram.org/bot${{ secrets.BOT_TOKEN }}/sendMessage \
-        -d chat_id=${{ secrets.CHAT_ID }} \
-        -d text="📢 *DNS HARAPAN RAKYAT TELAH DIPERBARUI*\n📅 $(date +'%Y-%m-%d')\n🛡️ File: *indonesia-optimal.txt*\n✅ Siap digunakan oleh AdGuard Home" \
-        -d parse_mode=Markdown
+    - name: Kirim notifikasi Telegram dengan isi file
+  run: |
+    DNS_CONTENT=$(cat dns-upstream/indonesia-optimal.txt | sed ':a;N;$!ba;s/\n/%0A/g')
+    MESSAGE="📢 *DNS TERCEPAT HARI INI DIPERBARUI*%0A%0A📅 *Tanggal:* $(date +'%Y-%m-%d')%0A🗂️ *File:* \`indonesia-optimal.txt\`%0A✅ *Siap digunakan oleh AdGuard Home*%0A%0A*Isi DNS:*%0A\`\`\`%0A$DNS_CONTENT%0A\`\`\`"
+    curl -s -X POST https://api.telegram.org/bot${{ secrets.BOT_TOKEN }}/sendMessage \
+      -d chat_id=${{ secrets.CHAT_ID }} \
+      -d text="$MESSAGE" \
+      -d parse_mode=Markdown
+
