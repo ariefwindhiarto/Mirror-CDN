@@ -3,7 +3,7 @@ name: Update DNS Bebas Sensor
 on:
   schedule:
     - cron: '0 3 * * *'   # Pagi jam 10:00 WIB
-    - cron: '0 15 * * *'  # Malam jam 22:00 WIB
+    - cron: '0 15 * * *'  # Sore jam 22:00 WIB
   workflow_dispatch:
 
 jobs:
@@ -28,11 +28,11 @@ jobs:
             continue
           fi
 
-          timeout 2 dig @${server} google.com +short > /dev/null 2>&1
+          timeout 3 bash -c "dig @$server google.com +short +timeout=1" > /dev/null 2>&1
           if [ $? -eq 0 ]; then
             echo "$server # $comment" >> dns-upstream/indonesia-optimal.txt
           else
-            echo "❌ DNS $server gagal respons, dilewati"
+            echo "❌ $server gagal respons, dilewati"
           fi
         done < dns-upstream/harian-tercepat.txt
 
@@ -60,8 +60,6 @@ jobs:
 
     - name: Tes & urutkan DNS aktif berdasarkan latency
       run: |
-        mkdir -p dns-upstream
-        > dns-upstream/indonesia-optimal.txt
         > dns-upstream/dns-latency-temp.txt
 
         while read -r line; do
@@ -72,25 +70,16 @@ jobs:
             continue
           fi
 
-          # Tes latency DNS via dig (timeout 2 detik)
-          result=$(dig @$server google.com +stats +timeout=2 2>/dev/null)
-          status=$?
-
-          if [ $status -eq 0 ]; then
+          result=$(timeout 3 bash -c "dig @$server google.com +stats +timeout=1" 2>/dev/null)
+          if [ $? -eq 0 ]; then
             latency=$(echo "$result" | grep "Query time" | awk '{print $4}')
             if [ -z "$latency" ]; then latency=9999; fi
             echo "$latency|$server|$comment" >> dns-upstream/dns-latency-temp.txt
           else
-            echo "❌ DNS $server gagal, dilewati"
+            echo "❌ $server gagal respons, dilewati"
           fi
         done < dns-upstream/harian-tercepat.txt
 
-        # Urutkan DNS berdasarkan latency terkecil
         sort -n dns-upstream/dns-latency-temp.txt | while IFS='|' read -r latency server comment; do
-          echo "$server # $comment (⏱ $latency ms)" >> dns-upstream/indonesia-optimal.txt
+          echo "$server # $comment (⏱ ${latency}ms)" >> dns-upstream/indonesia-optimal.txt
         done
-
-
-
-
-
