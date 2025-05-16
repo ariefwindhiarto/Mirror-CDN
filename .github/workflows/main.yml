@@ -17,24 +17,42 @@ jobs:
     - name: Siapkan folder DNS
       run: mkdir -p dns-upstream
 
-    - name: Generate DNS aktif dari harian-tercepat.txt
+       - name: Generate DNS aktif dari harian-tercepat.txt
       run: |
         > dns-upstream/indonesia-optimal.txt
+        > dns-upstream/dns-test-log.txt
+
+        MAX_DNS=25   # 🔒 Batas aman untuk GitHub Actions
+
+        echo "🔍 Mulai tes hingga $MAX_DNS server DNS..."
+        count=0
 
         while read -r line; do
           server=$(echo "$line" | cut -d'#' -f1 | xargs)
           comment=$(echo "$line" | cut -d'#' -f2- | xargs)
+
           if [ -z "$server" ] || [[ "$server" =~ ^# ]]; then
             continue
+          fi
+
+          # Batasi hanya tes maksimal X server
+          if [ "$count" -ge "$MAX_DNS" ]; then
+            echo "🛑 Batas maksimal $MAX_DNS DNS telah diuji."
+            break
           fi
 
           timeout 3 bash -c "dig @$server google.com +short +timeout=1" > /dev/null 2>&1
           if [ $? -eq 0 ]; then
             echo "$server # $comment" >> dns-upstream/indonesia-optimal.txt
+            echo "✅ $server aktif" >> dns-upstream/dns-test-log.txt
+            count=$((count+1))
           else
-            echo "❌ $server gagal respons, dilewati"
+            echo "❌ $server mati" >> dns-upstream/dns-test-log.txt
           fi
         done < dns-upstream/harian-tercepat.txt
+
+        echo "🎯 Total aktif: $count DNS"
+
 
     - name: Commit jika ada perubahan
       run: |
