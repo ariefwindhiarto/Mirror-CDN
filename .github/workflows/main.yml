@@ -1,0 +1,25 @@
+name: Update DNS Indonesia Optimal
+
+on:
+  schedule:
+    - cron: '0 3 * * *' # Setiap hari jam 3 pagi (WIB)
+  workflow_dispatch:     # Bisa dijalankan manual juga dari tab Actions
+
+jobs:
+  update-dns:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Download DNS terbaik dan update file
+        run: |
+          curl -s https://mirror1.mydns.network/dns-indonesia-terbaik.txt > dns-upstream/indonesia-optimal.txt
+
+      - name: Commit & Push if updated
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add dns-upstream/indonesia-optimal.txt
+          git commit -m "Auto update: DNS optimal harian" || echo "No changes"
+          git push
