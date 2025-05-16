@@ -57,3 +57,40 @@ jobs:
           -d chat_id=${{ secrets.CHAT_ID }} \
           -d text="$MESSAGE" \
           -d parse_mode=Markdown
+
+    - name: Tes & urutkan DNS aktif berdasarkan latency
+      run: |
+        mkdir -p dns-upstream
+        > dns-upstream/indonesia-optimal.txt
+        > dns-upstream/dns-latency-temp.txt
+
+        while read -r line; do
+          server=$(echo "$line" | cut -d'#' -f1 | xargs)
+          comment=$(echo "$line" | cut -d'#' -f2- | xargs)
+
+          if [ -z "$server" ] || [[ "$server" =~ ^# ]]; then
+            continue
+          fi
+
+          # Tes latency DNS via dig (timeout 2 detik)
+          result=$(dig @$server google.com +stats +timeout=2 2>/dev/null)
+          status=$?
+
+          if [ $status -eq 0 ]; then
+            latency=$(echo "$result" | grep "Query time" | awk '{print $4}')
+            if [ -z "$latency" ]; then latency=9999; fi
+            echo "$latency|$server|$comment" >> dns-upstream/dns-latency-temp.txt
+          else
+            echo "❌ DNS $server gagal, dilewati"
+          fi
+        done < dns-upstream/harian-tercepat.txt
+
+        # Urutkan DNS berdasarkan latency terkecil
+        sort -n dns-upstream/dns-latency-temp.txt | while IFS='|' read -r latency server comment; do
+          echo "$server # $comment (⏱ $latency ms)" >> dns-upstream/indonesia-optimal.txt
+        done
+
+
+
+
+
