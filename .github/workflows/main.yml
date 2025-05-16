@@ -53,33 +53,41 @@ jobs:
           git commit -m "Auto update DNS optimal bebas sensor" || echo "Tidak ada perubahan"
           git push
 
-      - name: Kirim notifikasi Telegram
-        env:
-          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
-          CHAT_ID: ${{ secrets.CHAT_ID }}
-        run: |
-          TANGGAL=$(date +"%Y-%m-%d")
-          BARIS=$(wc -l < dns-upstream/indonesia-optimal.txt | xargs)
-          TOTAL=$(wc -l < dns-upstream/harian-tercepat.txt | xargs)
-          SUKSES=$(grep -c '🟢' dns-upstream/dns-test-log.txt || true)
-          GAGAL=$(grep -c '❌' dns-upstream/dns-test-log.txt || true)
-          PENGUBAH=$(git log -1 --pretty=format:'%an')
-          LINK_FILE="https://github.com/${{ github.repository }}/blob/${{ github.ref_name }}/dns-upstream/indonesia-optimal.txt"
-          COMMIT_URL="https://github.com/${{ github.repository }}/commit/${{ github.sha }}"
+        - name: Kirim notifikasi Telegram
+    env:
+      BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+      CHAT_ID: ${{ secrets.CHAT_ID }}
+    run: |
+      TANGGAL=$(date +"%Y-%m-%d")
+      BARIS=$(wc -l < dns-upstream/indonesia-optimal.txt | xargs)
+      PENGUBAH=$(git log -1 --pretty=format:'%an')
+      LINK_FILE="https://github.com/${{ github.repository }}/blob/${{ github.ref_name }}/dns-upstream/indonesia-optimal.txt"
+      COMMIT_URL="https://github.com/${{ github.repository }}/commit/${{ github.sha }}"
+      
+      TOTAL=$(wc -l < dns-upstream/harian-tercepat.txt | xargs)
+      SUKSES=$(grep -c '🟢' dns-upstream/dns-test-log.txt || true)
+      GAGAL=$(grep -c '❌' dns-upstream/dns-test-log.txt || true)
 
-          TEXT=$(printf "%s\n" \
-            "📢 *DNS BEBAS SENSOR TERBARU*" \
-            "📅 *$TANGGAL*" \
-            "📄 Baris aktif: $BARIS dari $TOTAL" \
-            "🟢 Sukses: $SUKSES   ❌ Gagal: $GAGAL" \
-            "✍️ Update oleh: $PENGUBAH" \
-            "" \
-            "✅ Siap digunakan oleh AdGuard Home." \
-            "📁 File: [indonesia-optimal.txt]($LINK_FILE)" \
-            "🔗 [Lihat commit]($COMMIT_URL)"
-          )
+      ISI_DNS=$(cat dns-upstream/indonesia-optimal.txt)
 
-          curl -s -X POST https://api.telegram.org/bot$BOT_TOKEN/sendMessage \
-            -d chat_id="$CHAT_ID" \
-            -d parse_mode="Markdown" \
-            -d text="$TEXT"
+      TEXT=$(cat <<EOF
+📢 *DNS BEBAS SENSOR TERBARU*
+📅 *${TANGGAL}*
+📊 Baris aktif: ${BARIS} dari ${TOTAL}
+🟢 Sukses: ${SUKSES}  ❌ Gagal: ${GAGAL}
+✍️ Update oleh: ${PENGUBAH}
+
+✅ Siap digunakan oleh AdGuard Home.
+📂 File: [indonesia-optimal.txt](${LINK_FILE})
+🔗 [Lihat commit](${COMMIT_URL})
+
+\`\`\`
+${ISI_DNS}
+\`\`\`
+EOF
+)
+
+      curl -s -X POST https://api.telegram.org/bot$BOT_TOKEN/sendMessage \
+        -d chat_id="$CHAT_ID" \
+        -d parse_mode="Markdown" \
+        -d text="$TEXT"
