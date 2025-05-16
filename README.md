@@ -1,8 +1,17 @@
-# Mirror-CDN
+<p align="center">
+  <img src="https://raw.githubusercontent.com/ariefwindhiarto/Mirror-CDN/main/logo-cdn-kerajaan.png" alt="Logo Mirror-CDN" width="200"/>
+</p>
 
-📡 _Custom DNS Blocklist & Whitelist untuk AdGuard Home_
+<h1 align="center">Mirror-CDN 👑</h1>
+<p align="center"><i>DNS Blocklist & Whitelist untuk AdGuard Home - Aman, Terbuka, Berdaulat.</i></p>
 
-Repositori ini berisi daftar blokir dan daftar putih DNS yang dapat digunakan secara otomatis oleh **AdGuard Home** maupun sistem DNS sinkron lain. Seluruh daftar ini dikelola oleh [ariefwindhiarto](https://github.com/ariefwindhiarto) dan tersedia dalam format *Adblock-style syntax* untuk mendukung penyaringan cerdas dan auto-update dari GitHub Pages.
+<p align="center">
+  <img src="https://img.shields.io/badge/status-AKTIF-success" alt="Status Aktif"/>
+  <img src="https://img.shields.io/badge/aturan%20blokir-25-red" alt="Jumlah Aturan Blokir"/>
+  <img src="https://img.shields.io/badge/aturan%20whitelist-16-blue" alt="Jumlah Aturan Whitelist"/>
+  <img src="https://img.shields.io/github/last-commit/ariefwindhiarto/Mirror-CDN?label=update" alt="Last Updated"/>
+  <img src="https://img.shields.io/github/license/ariefwindhiarto/Mirror-CDN" alt="License"/>
+</p>
 
 ---
 
@@ -26,7 +35,7 @@ Repositori ini berisi daftar blokir dan daftar putih DNS yang dapat digunakan se
 
 ---
 
-## ✅ Format
+## 🧪 Format
 
 Semua file menggunakan sintaks AdGuard-style:
 - Blokir domain: `||domain.com^`
@@ -34,21 +43,21 @@ Semua file menggunakan sintaks AdGuard-style:
 
 ---
 
-## 🧠 Tujuan Proyek
+## 💡 Tujuan Proyek
 
-- Membantu komunitas menjalankan penyaringan DNS yang ringan, efisien, dan bisa dikendalikan sepenuhnya
-- Menyediakan daftar publik yang modular, terbuka, dan bebas digunakan
-- Mendukung fokus, privasi, dan akses internet yang lebih sehat
+- Menyediakan penyaringan DNS ringan dan bebas kontrol
+- Mendukung DNS privat yang bersih, sadar, dan manusiawi
+- Membuka akses terbuka ke daftar modular yang mudah digunakan
 
 ---
 
 ## 🤝 Kontribusi
 
-Silakan fork repo ini atau ajukan **pull request** untuk menambah domain baru ke blocklist atau whitelist. Semua masukan dipertimbangkan secara terbuka.
+Silakan fork repo ini atau ajukan **pull request** untuk menambah domain baru ke blocklist atau whitelist.
 
 ---
 
-## 🌐 Lisensi
+## 🧾 Lisensi
 
-Proyek ini dirilis sebagai **open-source** untuk tujuan edukasi dan penggunaan pribadi. Silakan gunakan, modifikasi, dan bagikan.
+Repositori ini bersifat **open-source** untuk edukasi, kesadaran digital, dan penggunaan pribadi. Silakan modifikasi dan bagikan.
 
