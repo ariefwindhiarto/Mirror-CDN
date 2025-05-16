@@ -1,8 +1,9 @@
-name: Update DNS dari file statis harian
+name: Update DNS Bebas Sensor
 
 on:
   schedule:
-    - cron: '0 3 * * *'
+    - cron: '0 3 * * *'   # Pagi jam 10:00 WIB
+    - cron: '0 15 * * *'  # Malam jam 22:00 WIB
   workflow_dispatch:
 
 jobs:
@@ -13,29 +14,46 @@ jobs:
     - name: Checkout repo
       uses: actions/checkout@v3
 
-    - name: Salin DNS harian
-      run: |
-        mkdir -p dns-upstream
-        cp dns-upstream/harian-tercepat.txt dns-upstream/indonesia-optimal.txt
+    - name: Siapkan folder DNS
+      run: mkdir -p dns-upstream
 
-    - name: Commit perubahan
+    - name: Generate DNS aktif dari harian-tercepat.txt
+      run: |
+        > dns-upstream/indonesia-optimal.txt
+
+        while read -r line; do
+          server=$(echo "$line" | cut -d'#' -f1 | xargs)
+          comment=$(echo "$line" | cut -d'#' -f2- | xargs)
+          if [ -z "$server" ] || [[ "$server" =~ ^# ]]; then
+            continue
+          fi
+
+          timeout 2 dig @${server} google.com +short > /dev/null 2>&1
+          if [ $? -eq 0 ]; then
+            echo "$server # $comment" >> dns-upstream/indonesia-optimal.txt
+          else
+            echo "❌ DNS $server gagal respons, dilewati"
+          fi
+        done < dns-upstream/harian-tercepat.txt
+
+    - name: Commit jika ada perubahan
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         git add dns-upstream/indonesia-optimal.txt
-        git commit -m "Auto update dari harian-tercepat.txt" || echo "No changes"
+        git commit -m "Auto update DNS aktif dan bebas sensor" || echo "Tidak ada perubahan"
         git push
 
-    - name: Kirim notifikasi Telegram dengan isi DNS dan identitas
-  run: |
-    DNS_CONTENT=$(cat dns-upstream/indonesia-optimal.txt | sed ':a;N;$!ba;s/\n/%0A/g')
-    DNS_COUNT=$(grep -vc '^#' dns-upstream/indonesia-optimal.txt)
-    TRIGGERED_BY=${{ github.actor }}
-    DATE=$(date +'%Y-%m-%d')
+    - name: Kirim notifikasi Telegram
+      run: |
+        DNS_CONTENT=$(cat dns-upstream/indonesia-optimal.txt | sed ':a;N;$!ba;s/\n/%0A/g')
+        DNS_COUNT=$(grep -vc '^#' dns-upstream/indonesia-optimal.txt)
+        TRIGGERED_BY="${{ github.actor }}"
+        DATE=$(date +'%Y-%m-%d %H:%M')
 
-    MESSAGE="📢 *DNS TERCEPAT HARI INI TELAH DIPERBARUI*%0A%0A📅 *Tanggal:* $DATE%0A👤 *Pemicu:* $TRIGGERED_BY%0A🔢 *Total DNS:* $DNS_COUNT baris aktif%0A🗂️ *File:* \`indonesia-optimal.txt\`%0A✅ *Siap digunakan oleh AdGuard Home*%0A%0A*Isi DNS:*%0A\`\`\`%0A$DNS_CONTENT%0A\`\`\`"
+        MESSAGE="📢 *DNS BEBAS SENSOR DIPERBARUI*%0A%0A📅 *Tanggal:* $DATE%0A👤 *Pemicu:* $TRIGGERED_BY%0A🔢 *Jumlah DNS aktif:* $DNS_COUNT%0A🛡️ *Saring konten dewasa:* ❌ Tidak%0A%0A*Isi File:*%0A\`\`\`%0A$DNS_CONTENT%0A\`\`\`"
 
-    curl -s -X POST https://api.telegram.org/bot${{ secrets.BOT_TOKEN }}/sendMessage \
-      -d chat_id=${{ secrets.CHAT_ID }} \
-      -d text="$MESSAGE" \
-      -d parse_mode=Markdown
+        curl -s -X POST https://api.telegram.org/bot${{ secrets.BOT_TOKEN }}/sendMessage \
+          -d chat_id=${{ secrets.CHAT_ID }} \
+          -d text="$MESSAGE" \
+          -d parse_mode=Markdown
