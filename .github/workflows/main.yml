@@ -1,4 +1,27 @@
-- name: Update DNS dari file statis harian
-  run: |
-    mkdir -p dns-upstream
-    cp dns-upstream/harian-tercepat.txt dns-upstream/indonesia-optimal.txt
+name: Update DNS dari file statis harian
+
+on:
+  schedule:
+    - cron: '0 3 * * *' # Setiap hari jam 03.00 WIB
+  workflow_dispatch:
+
+jobs:
+  update-dns:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Salin file harian ke indonesia-optimal
+      run: |
+        mkdir -p dns-upstream
+        cp dns-upstream/harian-tercepat.txt dns-upstream/indonesia-optimal.txt
+
+    - name: Commit perubahan
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git add dns-upstream/indonesia-optimal.txt
+        git commit -m "Auto update dari harian-tercepat.txt" || echo "Tidak ada perubahan"
+        git push
