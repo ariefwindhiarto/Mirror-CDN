@@ -13,8 +13,10 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Download DNS terbaik dan update file
-        run: |
-          curl -s https://mirror1.mydns.network/dns-indonesia-terbaik.txt > dns-upstream/indonesia-optimal.txt
+  run: |
+    mkdir -p dns-upstream
+    echo -e "1.1.1.1\ntls://1.1.1.1\n8.8.8.8\ntls://8.8.8.8\n9.9.9.9\ntls://9.9.9.9" > dns-upstream/indonesia-optimal.txt
+
 
       - name: Commit & Push if updated
         run: |
