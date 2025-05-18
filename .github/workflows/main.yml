@@ -1,4 +1,4 @@
-name: Update DNS Bebas Sensor
+name: Update Optimal DNS
 
 on:
   schedule:
