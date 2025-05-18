@@ -1,6 +1,6 @@
-<p align="center">
+<!--<p align="center">
   <img src="https://raw.githubusercontent.com/ariefwindhiarto/Mirror-CDN/main/logo-cdn-kerajaan.png" alt="Logo Mirror-CDN" width="200"/>
-</p>
+</p>-->
 
 <h1 align="center">Mirror-CDN 👑</h1>
 <p align="center"><i>DNS Blocklist & Whitelist untuk AdGuard Home - Aman, Terbuka, Berdaulat.</i></p>
