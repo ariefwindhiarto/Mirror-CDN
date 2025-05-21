@@ -15,7 +15,9 @@ jobs:
 
       - name: Update file daftar DNS
         run: |
-          echo "# DNS IP Publik Direkomendasikan (Indonesia)\n# Updated: $(date -u)\n" > dns-ip-list.txt
+          echo "# DNS IP Publik Direkomendasikan (Indonesia)" > dns-ip-list.txt
+          echo "# Updated: 2025-05-21 02:53:19 UTC" >> dns-ip-list.txt
+          echo "" >> dns-ip-list.txt
           echo "1.1.1.1" >> dns-ip-list.txt
           echo "8.8.8.8" >> dns-ip-list.txt
           echo "9.9.9.9" >> dns-ip-list.txt
@@ -23,7 +25,9 @@ jobs:
           echo "94.140.14.14" >> dns-ip-list.txt
           echo "" >> dns-ip-list.txt
 
-          echo "# DNS-over-HTTPS (DoH) Recommended List - Indonesia\n# Updated: $(date -u)\n" > dns-doh-list.txt
+          echo "# DNS-over-HTTPS (DoH) Recommended List - Indonesia" > dns-doh-list.txt
+          echo "# Updated: 2025-05-21 02:53:19 UTC" >> dns-doh-list.txt
+          echo "" >> dns-doh-list.txt
           echo "https://dns.adguard.com/dns-query" >> dns-doh-list.txt
           echo "https://cloudflare-dns.com/dns-query" >> dns-doh-list.txt
           echo "https://dns.quad9.net/dns-query" >> dns-doh-list.txt
