@@ -1,4 +1,6 @@
-# DNS-over-HTTPS (DoH) List - Generated on 2025-05-21 02:38:31
+# DNS-over-HTTPS (DoH) Recommended List - Indonesia
+# Updated: 2025-05-21 02:53:19 UTC
+
 https://dns.adguard.com/dns-query
 https://cloudflare-dns.com/dns-query
 https://dns.quad9.net/dns-query
