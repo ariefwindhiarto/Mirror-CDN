@@ -43,6 +43,16 @@ Semua file menggunakan sintaks AdGuard-style:
 
 ---
 
+### 📌 Tambahan Baru (2025-05-21)
+
+Berikut dua file baru yang bisa kamu gunakan untuk konfigurasi STB atau AdGuard Home:
+
+| `dns-ip-list.txt` | Daftar IP DNS publik yang bisa digunakan langsung (tanpa DoH) untuk perangkat STB atau router. | [Raw Link](dns-ip-list.txt) |
+| `dns-doh-list.txt` | Daftar alamat DNS-over-HTTPS (DoH) yang direkomendasikan untuk keamanan dan privasi tambahan. | [Raw Link](dns-doh-list.txt) |
+
+---
+
+
 ## 💡 Tujuan Proyek
 
 - Menyediakan penyaringan DNS ringan dan bebas kontrol
